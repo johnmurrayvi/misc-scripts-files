@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+
+export USER=jmurray
+device=toro
+bdev=cm_$device-userdebug
+cm=/home/$USER/android/cm
+out=$cm/out/target/product/$device
+
+echo ""
+echo "Selected Device: $device"
+
+cd $cm
+
+
+echo ""
+echo "Current branch info:"
+echo ""
+
+repo branches | grep "*"
+
+
+echo ""
+echo "Running repo sync..."
+echo ""
+
+repo sync -j32
+
+
+echo ""
+echo "Setting up for build"
+echo ""
+
+source build/envsetup.sh && lunch $bdev
+
+
+echo ""
+echo "Running make on `grep 'processor' /proc/cpuinfo | wc -l` processors"
+echo ""
+
+make -j`grep 'processor' /proc/cpuinfo | wc -l` otapackage
+
+
+#echo ""
+#echo "Build finished, copying zip to desktop" 
+#echo ""
+
+#zname=`ls $out | grep ota`
+
+#mv $out/$zname $out/$(echo $zname | cut -c ${nmc}- | echo $USER | echo '.zip')
+
+
+echo ""
+echo "Done!"

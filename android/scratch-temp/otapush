@@ -1,0 +1,49 @@
+#!/bin/bash
+
+export USER=jmurray
+dev=toro
+cm=/home/$USER/android/cm
+out=$cm/out/target/product/$dev
+zname=`ls $out | grep ota`
+
+adb wait-for-device
+
+
+adb push $out/$zname /sdcard/Roms/$zname
+
+cat > $out/dowipedalvikcache.sh << EOF
+#!/sbin/sh
+for partition in data cache system sd-ext
+do
+	mount /\$partition
+	rm -rf /\$partition/dalvik-cache
+done
+
+for partition in data system sd-ext
+do
+	umount /\$partition
+done
+EOF
+
+adb push $out/dowipedalvikcache.sh /cache/dowipedalvikcache.sh
+adb shell chmod 755 /cache/dowipedalvikcache.sh
+
+adb shell mkdir -p /cache/recovery
+
+bdate=`date +%Y-%m-%d-%k.%M.%S`
+
+(cat << EOF) | sed s/__zname__/$zname/g | sed s/__bdate__/$bdate/g > $out/extendedcommand 
+assert(backup_rom("/sdcard/clockworkmod/backup/__bdate__"));
+run_program("/cache/dowipedalvikcache.sh");
+assert(install_zip("/sdcard/Roms/__zname__"));
+assert(install_zip("/sdcard/Roms/gapps-ics-20120429-signed.zip"));
+assert(install_zip("/sdcard/Roms/franco.Kernel-r196.zip"));
+EOF
+
+adb push $out/extendedcommand /cache/recovery/extendedcommand
+adb shell rm /cache/recovery/command
+
+adb reboot recovery
+
+rm $out/dowipedalvikcache.sh
+rm $out/extendedcommand

@@ -45,10 +45,11 @@ make -j`grep 'processor' /proc/cpuinfo | wc -l` otapackage
 #echo "Build finished, copying zip to desktop" 
 #echo ""
 
-#zname=`ls $out | grep ota`
+zname=`ls $out | grep ota`
 
-#mv $out/$zname $out/$(echo $zname | cut -c ${nmc}- | echo $USER | echo '.zip')
-
+cp $out/$zname ../mine/builds/cm_$device-ota-eng.$USER.$(date +%Y%m%d-%H%M).zip
+cd ../mine/builds
+md5sum cm_$device-ota-eng.$USER.$(date +%Y%m%d-%H%M).zip > cm_$device-ota-eng.$USER.$(date +%Y%m%d).zip.md5
 
 echo ""
 echo "Done!"

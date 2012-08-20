@@ -2,7 +2,7 @@
 #
 
 export USER=jmurray
-device=grouper
+device=$1
 bdev=cm_$device-userdebug
 cm=/home/$USER/android/cm
 out=$cm/out/target/product/$device
@@ -40,17 +40,16 @@ echo ""
 
 make -j`grep 'processor' /proc/cpuinfo | wc -l` otapackage
 
-
-#echo ""
-#echo "Build finished, copying zip to desktop" 
-#echo ""
+echo ""
+echo "Build finished, archiving build...." 
+echo ""
 
 zname=`ls $out | grep ota`
+czname=cm_$device-ota-eng.$USER.$(date +%Y%m%d-%H%M).zip
 
-cp $out/$zname ../mine/builds/cm_$device-ota-eng.$USER.$(date +%Y%m%d-%H%M).zip
+cp $out/$zname ../mine/builds/$czname
 cd ../mine/builds
-md5sum cm_$device-ota-eng.$USER.$(date +%Y%m%d-%H%M).zip > cm_$device-ota-eng.$USER.$(date +%Y%m%d).zip.md5
-
+md5sum $czname > $czname.md5
 
 echo ""
 echo "Done!"
